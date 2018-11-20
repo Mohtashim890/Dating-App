@@ -3,11 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DatingApp.API.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatingApp.API.Controllers
 {
+    // ASP.NET > 2.1 have following services:
+    // [Route("api/[controller]")] enforce attribute routing...[controller] == [___]Controller.cs
+    // Automatically validate our requests 
+    // For new controller, it inherits this base 'ControllerBase' (IActionResults defined in them)
+    // without view support (b/c view is provided by Angular in our case)
     [Route("api/[controller]")]
     [ApiController]
     public class ValuesController : ControllerBase
@@ -21,6 +27,7 @@ namespace DatingApp.API.Controllers
         }
         // GET api/values
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetValues()
         {
             var values = await _context.Values.ToListAsync();
@@ -29,6 +36,7 @@ namespace DatingApp.API.Controllers
 
         // GET api/values/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetValue(int id)
         {
             var value = await _context.Values.FirstOrDefaultAsync(x => x.Id == id);

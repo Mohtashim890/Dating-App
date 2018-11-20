@@ -16,6 +16,10 @@ using Microsoft.Extensions.Configuration.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Net;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using DatingApp.API.Helpers;
 
 namespace DatingApp.API
 {
@@ -71,6 +75,22 @@ namespace DatingApp.API
             }
             else
             {
+                // we use Global Exception Handler (middleware) to let (server+developer) handle errors in production
+                // mode (otherwise developer has to use try-catch blocks) so that we can be able to inform
+                // clients about error using Helpers/Extension.AddApplicationError()
+                app.UseExceptionHandler(builder => {
+                    builder.Run(async context => {
+                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        var errors = context.Features.Get<IExceptionHandlerFeature>();
+                        //write error message to http response BUT this response does not
+                        // have CORS headers included so we have to use an Helper.Extension methods.
+                        if(errors != null) {
+                            context.Response.AddApplicationError(errors.Error.Message);
+                            await context.Response.WriteAsync(errors.Error.Message);
+                        }
+
+                    });
+                });
                 // app.UseHsts();
             }
 

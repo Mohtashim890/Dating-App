@@ -15,7 +15,8 @@ namespace DatingApp.API.Data
             _context = context;
 
         }
-        
+        // Login and Register methods are threads that directly access databse
+        // via EF functions
         public async Task<User> Login(string username, string password)
         {
             // fetch data from db upon username match

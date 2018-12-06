@@ -50,6 +50,9 @@ namespace DatingApp.API
 
             // for CORS settings
             services.AddCors();
+            
+            // service for binding appsettings.json object to our custom class (CloudinarySettings.cs)
+            services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
 
             // add automapper
             services.AddAutoMapper();

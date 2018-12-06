@@ -17,10 +17,11 @@ namespace DatingApp.API.Data
         }
         // Login and Register methods are threads that directly access databse
         // via EF functions
+        // login will not return photo collection so include them manually using include()
         public async Task<User> Login(string username, string password)
         {
             // fetch data from db upon username match
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+            var user = await _context.Users.Include(p => p.Photos).FirstOrDefaultAsync(x => x.Username == username);
 
             if(user == null)
                 return null;

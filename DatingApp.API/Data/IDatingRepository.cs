@@ -18,6 +18,10 @@ namespace DatingApp.API.Data
 
        Task<User> GetUser(int id);
 
+       Task<Photo> GetPhoto(int id);
+
+       Task<Photo> GetMainPhotoForUser(int userId);
+
 
 
 

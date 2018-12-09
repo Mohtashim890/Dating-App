@@ -58,6 +58,12 @@ export class PhotoEditorComponent implements OnInit {
         };
         // now add photo to photos array
         this.photos.push(photo);
+        // auto check for 1st photo...api set it as main so update photoUrl observable accordingly
+        if (photo.isMain) {
+          this.authService.changeMemberPhoto(photo.url); // using photoUrl subjectbehavior observable
+          this.authService.currentUser.photoUrl = photo.url;
+          localStorage.setItem('user', JSON.stringify(this.authService.currentUser));
+        }
       }
     };
 

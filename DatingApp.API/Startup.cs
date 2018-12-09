@@ -65,6 +65,9 @@ namespace DatingApp.API
             
             services.AddScoped<IDatingRepository, DatingRepository>();
 
+            // Action Filter Service
+            services.AddScoped<LogUserActivity>();
+
             // register token authentication scheme
             // use [Authorize] tag in controllers to apply it
             // use [AllowAnonymous] tag in controllers to avoid authentication

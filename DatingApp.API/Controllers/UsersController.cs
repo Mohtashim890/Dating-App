@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System;
+using DatingApp.API.Helpers;
 
 namespace DatingApp.API.Controllers
 {
+    [ServiceFilter(typeof(LogUserActivity))]
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
@@ -25,17 +27,32 @@ namespace DatingApp.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery]UserParams userParams) // userParams coming from query string
         {
-            var users = await _repo.GetUsers();
-            // using automapper to store data in UserForDetailedDto's
+            // Filtering
+            // we need currently loggedin user's id and gender
+            // fetch that user from repo and update userParams
+            // set gender in userParams to opposite to current user's gender if null
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var userFromRepo = await _repo.GetUser(currentUserId);
+            userParams.UserId = currentUserId;
+            if (string.IsNullOrEmpty(userParams.Gender))
+            {
+                userParams.Gender = userFromRepo.Gender == "male" ? "female": "male";
+            }
+
+            var users = await _repo.GetUsers(userParams);
+            // using automapper to fill data in UserForDetailedDto's
             // we also need to tell AutoMapper explicitly about Classes and there properties
             // to map using automapper profile (See AutoMapperProfile.cs)
+            // IEnumerable list is sendable instead of PagedList..
             var userForReturn = _mapper.Map<IEnumerable<UserForListsDto>>(users);
+            // add pagination in http response
+            Response.AddPagination(users.CurrentPage, users.PageSize, users.TotalCount, users.TotalPages);
             return Ok(userForReturn);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetUser")]
         public async Task<IActionResult> GetUser(int id)
         {
             var user = await _repo.GetUser(id);

@@ -1,18 +1,33 @@
 using System;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace DatingApp.API.Helpers
 {
-    //static class means no instance required for using it methods
+    //static class means no instance required for using its methods
     public static class Extensions
     {
         public static void AddApplicationError(this HttpResponse response, string message) {
             // include new headers to our http response
             response.Headers.Add("Application-Error", message);
-            // to display above header
+            // to expose above header to avoid CORS error
             response.Headers.Add("Access-Control-Expose-Headers", "Application-Error");
             // to allow CORS
             response.Headers.Add("Access-Control-Allow-Origin", "*");
+        }
+
+        public static void AddPagination(this HttpResponse response, int currentPage, int itemsPerPage, 
+                int totalItems, int totalPages)
+        {
+             var paginationHeader = new PaginationHeader(currentPage, itemsPerPage, totalItems, totalPages);
+             // formate our Header Data to camelCase to meet (client)Angular requirenment
+             var camelCaseFormatter = new JsonSerializerSettings();
+             camelCaseFormatter.ContractResolver = new CamelCasePropertyNamesContractResolver();
+             // convert paginationHeader object to string
+             response.Headers.Add("Pagination", JsonConvert.SerializeObject(paginationHeader, camelCaseFormatter));
+            // to expose above header to avoid CORS error
+            response.Headers.Add("Access-Control-Expose-Headers", "Pagination");
         }
 
         // for calculating Age from DateOfBirth

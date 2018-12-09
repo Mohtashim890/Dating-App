@@ -17,7 +17,7 @@ export class AuthService {
   currentUser: User;
   /*photoUrl is observable property so that other components can subscribe to it...
     it can also act as observer i.e components can change its value*/
-  photoUrl = new BehaviorSubject<string>('../../assets/user.jpg');
+  photoUrl = new BehaviorSubject<string>('../../assets/user.png');
   currentPhotoUrl = this.photoUrl.asObservable();
 
   constructor(private http: HttpClient) { }
@@ -45,8 +45,8 @@ export class AuthService {
     );
   }
 
-  Register(model: any) {
-    return this.http.post(this.baseUrl + 'register', model);
+  Register(user: User) {
+    return this.http.post(this.baseUrl + 'register', user);
   }
 
   // service to check if user logged in

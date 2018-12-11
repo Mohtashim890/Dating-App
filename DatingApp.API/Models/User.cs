@@ -33,6 +33,13 @@ namespace DatingApp.API.Models
 
         public string Country { get; set; }
 
+        // one--->many relationship with users
         public ICollection<Photo> Photos { get; set; }
+        
+        public ICollection<Like> Likers { get; set; }
+
+        public ICollection<Like> Likees { get; set; }
+        public ICollection<Message> MessageSent { get; set; }
+        public ICollection<Message> MessageReceived { get; set; }
     }
 }

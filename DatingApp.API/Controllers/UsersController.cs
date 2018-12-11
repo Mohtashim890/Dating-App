@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System;
 using DatingApp.API.Helpers;
+using DatingApp.API.Models;
 
 namespace DatingApp.API.Controllers
 {
@@ -64,18 +65,42 @@ namespace DatingApp.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser (int id, UserForUpdateDto userForUpdateDto) {
             // check if path id and token id is same to prevent user from updating other accounts
-            // or check if request is sent by current(tokanized) user
             if(id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
                 return Unauthorized();
 
             var userFromRepo = await _repo.GetUser(id);
             // map values
             _mapper.Map(userForUpdateDto, userFromRepo);
-
+            // maping is not async so call SaveAll()
             if(await _repo.SaveAll())
                 return NoContent();
             
             throw new Exception($"updating user with {id} failed on save");
         }
+
+        [HttpPost("{id}/like/{recipientId}")]
+        public async Task<IActionResult> LikeUser(int id, int recipientId)
+        {
+            // check if request is sent by current(tokanized) user
+            if(id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+            // check if like already exist
+            var like = await _repo.GetLike(id, recipientId);
+            if(like != null)
+                return BadRequest("You already liked this user");
+            // check if recipient exist in db
+            if(await _repo.GetUser(recipientId) == null)
+                return NotFound();
+            
+            // adding like is not async so no need to user await...it is storing data
+            // into memory so need to call SaveAll()
+            like = new Like{LikerId = id, LikeeId = recipientId};
+            _repo.Add<Like>(like);
+            if(await _repo.SaveAll())
+                return Ok();
+            // if SaveAll() failed than
+            return BadRequest("Failed to like user");
+        }
+
     }
 }

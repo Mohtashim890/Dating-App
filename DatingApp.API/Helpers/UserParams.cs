@@ -18,6 +18,10 @@ namespace DatingApp.API.Helpers
         public int MaxAge { get; set; } = 99;
         // params for sorting
         public string OrderBy { get; set; }
+
+        // params for like filter
+        public bool Likees { get; set; } = false; // if we like someone it will get true
+        public bool Likers { get; set; } = false; // if someone like us it will get true
         
     }
 }
